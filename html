@@ -1,0 +1,28 @@
+// $kwpn_custom_header is the attachment_id, if you want multiple, you'll have to store as a comma 
+// delimited string, and implode them or whatever
+<p class="kwpn-image-parent">
+	<label>
+		<?php _e( 'Header Image', 'wp_kwpn' ); ?>
+	</label>
+	<span class="howto">
+		<?php _e( 'Display a large image in the header. See the help page', 'wp_kwpn' ); ?>
+	</span>
+	<div class="kwpn-image-upload-preview">
+		
+		<?php if ( ! empty( $kwpn_custom_header ) ) : ?>
+			<?php $source = wp_get_attachment_image_src( $kwpn_custom_header, 'small' ); ?>
+			<?php if ( isset( $source[0] ) ) : ?>
+				<img src="<?php	 echo esc_attr( $source[0] ); ?>" />
+			<?php endif; ?>
+			<a href="#" class="kwpn-image-remove-button">
+				<?php _e( 'Remove header image', 'wp_kwpn' ); ?>
+			</a>
+		<?php endif; ?>
+	</div>
+	<div class="kwpn-image-upload-holder">
+		<input class="kwpn-image-upload-id" type="hidden" name="kwpn_custom_header" value="<?php echo esc_attr( $kwpn_custom_header ); ?>"/>
+		<a class="kwpn-image-upload-button" href="#" data-update-button-text="<?php esc_attr_e( 'Updated!', 'wp_kwpn' ); ?>" data-title="<?php esc_attr_e( 'Choose Header Image', 'wp_kwpn' ); ?>" data-update-text="<?php esc_attr_e( 'Updated Header Image', 'wp_kwpn' ); ?>">
+			<?php _e( 'Choose Header', 'wp_kwpn' ); ?>
+		</a>
+	</div>
+</p>
