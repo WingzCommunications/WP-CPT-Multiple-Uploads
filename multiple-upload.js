@@ -1,59 +1,86 @@
+//multiple upload
+    jQuery(document).ready(function() {
+        var mediaMetaBox = {
+            config: {
+                dom: {}
+                , _frame: undefined
+            }
 
-pronamicMedia = function(elem, options) {
-	this.elem = elem;
-	this.$elem = jQuery(elem);
-	this.options = options;
-};
+            , init: function() {
+                this.config.dom.$parent = jQuery('.wingz-multi-upload-parent');
+                this.config.dom.$uploadButton = jQuery('.wingz-upload-button');
+                this.config.dom.$uploadInput = jQuery('.wingz-upload-id');
+                this.config.dom.$uploadPreview = jQuery('.wingz-upload-list');
+                this.config.dom.$uploadRemoveButton = jQuery('.kwpn-image-remove-button');
 
-pronamicMedia.prototype = {
-	_frame:undefined
+                this.binds();
+            }
 
-	, defaults: {}
+            , binds: function() {
+                var self = this;
 
-	, setDefaults: function() {
-		this.defaults.$target = jQuery(this.$elem.data('target'));
-		this.defaults.mediaOptions = {
-			  title:this.$elem.data('title')
-			, library: { type: 'image' }
-			, button: { text: this.$elem.data('update-text')}
-			, multiple: false
-		};
-	}
+                jQuery('#wpbody').on('click', '.wingz-upload-button', function(e) {
+                    e.preventDefault();
 
-	, init: function() {
-		this.setDefaults();
-		this.config = jQuery.extend({}, this.defaults, this.options);
-		this.binds();
-		return this;
-	}
+                    self.frame().open();
+                });
 
-	, binds: function() {
-		var self = this;
+                jQuery('#wpbody').on('click', '.kwpn-image-remove-button', function(e) {
+                    e.preventDefault();
+                    var image_id = jQuery(this).data('image-id'),
+                        value = self.config.dom.$uploadInput.val();
 
-		this.$elem.on('click', function(e) {
-			e.preventDefault();
-			self.frame().open();
-		} );
-	}
+                    value = value.replace(image_id, '');
+                    self.config.dom.$uploadInput.val(value);
+                    self.ajaxIt(value);
+                });
+            }
 
-	, frame: function() {
-		var self = this;
+            , frame: function() {
+                if (this._frame)
+                    return this._frame;
 
-		if(this._frame)
-			return this._frame;
+                var self = this;
 
-		this._frame = wp.media(this.config.mediaOptions);
-		this._frame.state('library').on('select', function() {
-			var selection = this.get('selection');
-			self.config.$target.val( selection.pluck('id') );
-		});
-		return this._frame;
-	}
-};
+                this._frame = wp.media({
+                    title: self.config.dom.$uploadButton.data('title')
+                    , library: {
+                        type: ''
+                        , uploadedTo : self.config.dom.$uploadButton.data('post-id')
+                    }
+                    , button: {
+                        text: self.config.dom.$uploadButton.data('update-text')
+                    }
+                    , multiple: true
+                });
 
-jQuery.fn.pronamicMedia = function(options) {
-	return this.each( function() {
-		new pronamicMedia(this, options).init();
-	} );
-};
+                this._frame.state('library').on('select', this.select);
+                return this._frame;
+            }
 
+            , select: function() {
+                var selection = this.get('selection');
+
+                mediaMetaBox.config.dom.$uploadInput.val( selection.pluck('id') );
+                mediaMetaBox.ajaxIt(selection.pluck('id'));
+            }
+
+            , ajaxIt: function(id) {
+                if( undefined === id)
+                    id = null;
+
+                var settings = wp.media.view.settings;
+
+                wp.media.post( 'resume_ajax_set_header', {
+                    json:true,
+                    post_id: settings.post.id,
+                    custom_header:id
+                }).done(function(html) {
+                        mediaMetaBox.config.dom.$uploadPreview.html(html);
+                        console.log(html);
+                    });
+            }
+        };
+
+        mediaMetaBox.init();
+    });
