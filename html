@@ -1,28 +1,32 @@
-// $kwpn_custom_header is the attachment_id, if you want multiple, you'll have to store as a comma 
-// delimited string, and implode them or whatever
-<p class="kwpn-image-parent">
-	<label>
-		<?php _e( 'Header Image', 'wp_kwpn' ); ?>
-	</label>
-	<span class="howto">
-		<?php _e( 'Display a large image in the header. See the help page', 'wp_kwpn' ); ?>
-	</span>
-	<div class="kwpn-image-upload-preview">
-		
-		<?php if ( ! empty( $kwpn_custom_header ) ) : ?>
-			<?php $source = wp_get_attachment_image_src( $kwpn_custom_header, 'small' ); ?>
-			<?php if ( isset( $source[0] ) ) : ?>
-				<img src="<?php	 echo esc_attr( $source[0] ); ?>" />
-			<?php endif; ?>
-			<a href="#" class="kwpn-image-remove-button">
-				<?php _e( 'Remove header image', 'wp_kwpn' ); ?>
-			</a>
-		<?php endif; ?>
-	</div>
-	<div class="kwpn-image-upload-holder">
-		<input class="kwpn-image-upload-id" type="hidden" name="kwpn_custom_header" value="<?php echo esc_attr( $kwpn_custom_header ); ?>"/>
-		<a class="kwpn-image-upload-button" href="#" data-update-button-text="<?php esc_attr_e( 'Updated!', 'wp_kwpn' ); ?>" data-title="<?php esc_attr_e( 'Choose Header Image', 'wp_kwpn' ); ?>" data-update-text="<?php esc_attr_e( 'Updated Header Image', 'wp_kwpn' ); ?>">
-			<?php _e( 'Choose Header', 'wp_kwpn' ); ?>
-		</a>
-	</div>
-</p>
+<div class="wingz-multi-upload-parent">
+                <?php wp_nonce_field(plugin_basename(__FILE__), 'resume_custom_attachment_nonce'); ?>
+                <div class="wingz-upload-holder">
+                    <input class="wingz-upload-id" type="hidden" name="custom_header" value="<?php echo esc_attr( $custom_header ); ?>"/>
+                    <a class="wingz-upload-button" href="#" data-post-id="<?php esc_attr_e($object->ID); ?>" data-update-button-text="<?php esc_attr_e( 'Updated!', 'wingz_resume' ); ?>" data-title="<?php esc_attr_e( 'Upload Files', 'wingz_resume' ); ?>" data-update-text="<?php esc_attr_e( 'Uploaded Files', 'wingz_resume' ); ?>">
+                        <?php _e( 'Upload Files', 'wingz_resume' ); ?>
+                    </a>
+                </div>
+                <div class="wingz-upload-list">
+                    <strong><?php _e( "Attached Files", 'wingz_resume' ); ?></strong>
+                    <?php
+                    $attachments = get_posts( array(
+                        'post_type' => 'attachment',
+                        'posts_per_page' => -1,
+                        'post_parent' => $object->ID,
+                        'exclude'     => get_post_thumbnail_id()
+                    ) );
+
+                    if ( $attachments ) {
+                        echo '<ul>';
+                        foreach ( $attachments as $attachment ) {
+                            $class = "post-attachment mime-" . sanitize_title( $attachment->post_mime_type );
+                            $attachment_url = wp_get_attachment_url($attachment->ID);
+                            echo '<li class="' . $class . ' data-design-thumbnail"><a href="' . $attachment_url . '">' . $attachment->post_title . '</a></li>';
+                        }
+                        echo '</ul>';
+                    }
+                    wp_reset_postdata();
+                    ?>
+
+                </div>
+            </div>
